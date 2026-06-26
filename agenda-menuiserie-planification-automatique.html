@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda menuiserie planification automatique</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem); --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem); --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-2:.5rem; --space-3:.75rem; --space-4:1rem; --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-text:#28251d; --color-text-muted:#6f6d67; --color-text-inverse:#f9f8f4; --color-primary:#6f4a2d; --color-primary-hover:#543720; --color-primary-highlight:#e3d6cb; --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-blue:#01696f; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem; --radius-full:9999px; --shadow-sm:0 1px 2px rgba(26,26,26,.06); --font-body:'Satoshi', Arial, sans-serif;
+    }
+    [data-theme="dark"] { --color-bg:#171614; --color-surface:#1d1a18; --color-surface-2:#221f1c; --color-surface-offset:#2a2522; --color-border:#3d3834; --color-text:#e8e0d7; --color-text-muted:#aea59b; --color-text-inverse:#171614; --color-primary:#b7865c; --color-primary-hover:#d1a07a; --color-primary-highlight:#3c312a; --color-success:#6daa45; --color-warning:#cf8c5e; --color-error:#d163a7; --color-blue:#4f98a3; }
+    *{box-sizing:border-box;margin:0;padding:0} html,body{height:100%} body{font-family:var(--font-body);font-size:var(--text-base);background:var(--color-bg);color:var(--color-text);line-height:1.45}
+    button,input,select,textarea{font:inherit;color:inherit} button{cursor:pointer;border:none}
+    .app{display:grid;grid-template-columns:360px 1fr;grid-template-rows:auto 1fr;height:100dvh}.sidebar{grid-row:1/-1;background:var(--color-surface);border-right:1px solid var(--color-border);padding:var(--space-6);overflow:auto}.header{display:flex;align-items:center;justify-content:space-between;padding:var(--space-4) var(--space-6);border-bottom:1px solid var(--color-border);background:color-mix(in srgb, var(--color-surface) 88%, transparent);position:sticky;top:0;z-index:5}.main{overflow:auto;padding:var(--space-6);display:grid;gap:var(--space-6)}
+    .brand,.toolbar,.actions,.legend{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}.brand{margin-bottom:var(--space-6)} .logo{width:42px;height:42px;border-radius:12px;background:var(--color-primary-highlight);display:grid;place-items:center;color:var(--color-primary)} .logo svg{width:24px;height:24px}
+    .panel{background:var(--color-surface);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)} .panel-pad{padding:var(--space-5)} .stack,.row,.schedule-list,.rule-list{display:grid;gap:var(--space-4)} .schedule-list{gap:var(--space-3)} .tiny{font-size:var(--text-xs);color:var(--color-text-muted)} .muted{color:var(--color-text-muted)}
+    .btn{min-height:44px;padding:.72rem 1rem;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-offset)} .btn-primary{background:var(--color-primary);color:var(--color-text-inverse);border-color:transparent} .btn-primary:hover{background:var(--color-primary-hover)}
+    label{font-size:var(--text-sm);font-weight:600} input,select,textarea{width:100%;min-height:44px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);padding:.75rem .85rem} textarea{min-height:82px;resize:vertical}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4)} .stat strong{font-size:var(--text-lg);display:block}.grid{display:grid;grid-template-columns:1.3fr .7fr;gap:var(--space-6)}
+    .calendar-head,.weekdays,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--space-2)} .calendar-head{align-items:center;margin-bottom:var(--space-4)} .weekdays div{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);padding:0 var(--space-2)}
+    .day{min-height:170px;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-2);display:flex;flex-direction:column;gap:var(--space-2)} .day.is-today{outline:2px solid var(--color-primary-highlight)} .day.is-other{opacity:.42} .day.is-blocked{background:color-mix(in srgb, var(--color-error) 10%, var(--color-surface-2))}
+    .day-top{display:flex;justify-content:space-between;align-items:center;font-size:var(--text-xs)} .count{background:var(--color-primary-highlight);color:var(--color-primary);padding:.12rem .45rem;border-radius:var(--radius-full)} .badge,.chip{padding:.32rem .6rem;border-radius:var(--radius-full);font-size:var(--text-xs)} .chip{background:var(--color-surface-offset);border:1px solid var(--color-border)}
+    .slot{padding:.42rem;border-radius:var(--radius-md);font-size:var(--text-xs);display:grid;gap:.12rem;border-left:4px solid var(--slot-color,#6f4a2d);background:color-mix(in srgb, var(--slot-color,#6f4a2d) 10%, var(--color-surface))}
+    .schedule-item{display:grid;gap:.35rem;padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid var(--color-border)} .schedule-item-top{display:flex;justify-content:space-between;gap:var(--space-3);align-items:flex-start}
+    .b-plan{background:color-mix(in srgb, var(--color-blue) 14%, var(--color-surface));color:var(--color-blue)} .b-run{background:color-mix(in srgb, var(--color-success) 14%, var(--color-surface));color:var(--color-success)} .b-wait{background:color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));color:var(--color-warning)} .b-delay{background:color-mix(in srgb, var(--color-error) 14%, var(--color-surface));color:var(--color-error)}
+    .note{padding:var(--space-3);border-radius:var(--radius-md);background:var(--color-surface-offset);font-size:var(--text-sm)} table{width:100%;border-collapse:collapse;font-size:var(--text-sm)} th,td{padding:.55rem;border-bottom:1px solid var(--color-border);text-align:left;vertical-align:top}
+    @media (max-width:1180px){.app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}.sidebar{grid-row:auto;border-right:none;border-bottom:1px solid var(--color-border)}.grid,.stats{grid-template-columns:1fr 1fr}} @media (max-width:760px){.main{padding:var(--space-4)}.grid,.stats{grid-template-columns:1fr}.calendar-head{grid-template-columns:1fr auto auto}.calendar-head h2{grid-column:1/-1}.day{min-height:122px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"></path><path d="M6 19V8l6-3 6 3v11"></path><path d="M9 19v-4h6v4"></path></svg></div><div><h1 style="font-size:var(--text-lg)">Agenda menuiserie V3</h1><p class="tiny">Planification automatique réelle</p></div></div>
+    <div class="panel panel-pad stack">
+      <div><h2 style="font-size:var(--text-lg)">Règles moteur</h2><div class="rule-list" style="font-size:var(--text-sm)"><div>Priorité : Commandes → Devis → Urgents → Normaux → Flexibles → Admin → RDV.</div><div>Vendredi sans chantier : livraison matin, rattrapage après-midi.</div><div>Congés du 07/08 au 17/08 bloqués.</div><div>Samedis autorisés : 01/08, 29/08, 19/09.</div><div>Été : 8h nettes, hiver : 7h30 nettes.</div></div></div>
+      <button class="btn" id="themeToggle" type="button">Mode sombre</button>
+    </div>
+    <div class="panel panel-pad stack" style="margin-top:var(--space-5)">
+      <div><h2 style="font-size:var(--text-lg)">Nouvelle demande</h2><p class="tiny">Le moteur découpe et place automatiquement.</p></div>
+      <form id="taskForm" class="stack">
+        <div class="row"><label for="title">Intitulé</label><input id="title" required placeholder="Ex. Pose verrière atelier" /></div>
+        <div class="row"><label for="client">Client</label><input id="client" required placeholder="Nom ou société" /></div>
+        <div class="row"><label for="category">Catégorie</label><select id="category"><option>Commande</option><option>Devis</option><option>Urgent</option><option>Normal</option><option>Flexible</option><option>Admin</option><option>RDV</option></select></div>
+        <div class="row"><label for="trade">Type menuiserie</label><select id="trade"><option>Agencement intérieur</option><option>Pose cuisine</option><option>Dressing</option><option>Portes intérieures</option><option>Fenêtres et volets</option><option>Escalier / mobilier sur mesure</option></select></div>
+        <div class="row"><label for="earliest">À partir du</label><input id="earliest" type="date" required /></div>
+        <div class="row"><label for="hours">Charge totale (heures)</label><input id="hours" type="number" min="1" step="0.5" value="8" required /></div>
+        <div class="row"><label for="splittable">Fractionnable</label><select id="splittable"><option value="oui">Oui</option><option value="non">Non</option></select></div>
+        <div class="row"><label for="notes">Notes</label><textarea id="notes" placeholder="Exigences client, urgence, fournisseur, atelier/pose..."></textarea></div>
+        <button class="btn btn-primary" type="submit">Planifier automatiquement</button>
+      </form>
+    </div>
+  </aside>
+  <header class="header">
+    <div><p class="tiny">Moteur de planification</p><h2 style="font-size:var(--text-xl)">Calendrier auto-généré selon vos contraintes</h2></div>
+    <div class="toolbar"><button class="btn" id="prevMonth" type="button">Mois précédent</button><button class="btn" id="todayBtn" type="button">Aujourd'hui</button><button class="btn" id="nextMonth" type="button">Mois suivant</button><button class="btn btn-primary" id="replanBtn" type="button">Recalculer</button></div>
+  </header>
+  <main class="main">
+    <section class="stats">
+      <div class="panel panel-pad stat"><span class="tiny">Demandes</span><strong id="statTasks">0</strong><span class="muted">Entrées à planifier</span></div>
+      <div class="panel panel-pad stat"><span class="tiny">Créneaux générés</span><strong id="statSlots">0</strong><span class="muted">Découpage automatique</span></div>
+      <div class="panel panel-pad stat"><span class="tiny">Retards</span><strong id="statDelay">0</strong><span class="muted">Décalage automatique</span></div>
+      <div class="panel panel-pad stat"><span class="tiny">Jours bloqués</span><strong id="statBlocked">0</strong><span class="muted">Congés et jours fermés</span></div>
+    </section>
+    <section class="grid">
+      <div class="panel panel-pad">
+        <div class="calendar-head"><h2 id="monthLabel" style="font-size:var(--text-lg)"></h2><button class="btn" id="shiftDelays" type="button">+1 jour retards</button><button class="btn" id="resetDemo" type="button">Réinitialiser</button></div>
+        <div class="weekdays"><div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div></div>
+        <div id="days" class="days" style="margin-top:var(--space-2)"></div>
+      </div>
+      <div class="stack">
+        <div class="panel panel-pad"><h2 style="font-size:var(--text-lg);margin-bottom:var(--space-3)">Semaine type</h2><table><thead><tr><th>Type</th><th>Créneau</th><th>Règle</th></tr></thead><tbody id="seasonTable"></tbody></table></div>
+        <div class="panel panel-pad"><h2 style="font-size:var(--text-lg);margin-bottom:var(--space-3)">Demandes et placement</h2><div id="scheduleList" class="schedule-list"></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+<script>
+const priorityRank = {Commande:1, Devis:2, Urgent:3, Normal:4, Flexible:5, Admin:6, RDV:7};
+const tradeColors = {'Agencement intérieur':'#01696f','Pose cuisine':'#6f4a2d','Dressing':'#7a5a2f','Portes intérieures':'#437a22','Fenêtres et volets':'#a12c7b','Escalier / mobilier sur mesure':'#006494'};
+const allowedSaturdaySet = new Set(['2026-08-01','2026-08-29','2026-09-19']); const leaveStart='2026-08-07'; const leaveEnd='2026-08-17';
+const initialTasks = [
+  {id:1,title:'Commande quincaillerie cuisine',client:'Cuisine Martin',category:'Commande',trade:'Pose cuisine',earliest:'2026-06-29',hours:2,splittable:'non',notes:'Avant mercredi midi précédent chantier.',status:'Planifié'},
+  {id:2,title:'Devis bibliothèque sur mesure',client:'Mme Lambert',category:'Devis',trade:'Agencement intérieur',earliest:'2026-06-29',hours:2,splittable:'oui',notes:'À traiter en début de semaine le matin.',status:'Planifié'},
+  {id:3,title:'Pose dressing Lambert',client:'Mme Lambert',category:'Normal',trade:'Dressing',earliest:'2026-07-01',hours:16,splittable:'oui',notes:'Découpe en plusieurs demi-journées possible.',status:'En cours'},
+  {id:4,title:'Visite technique fenêtres',client:'SCI Les Arènes',category:'RDV',trade:'Fenêtres et volets',earliest:'2026-07-02',hours:2,splittable:'non',notes:'Une visite technique hebdomadaire.',status:'Planifié'},
+  {id:5,title:'Factures et relances',client:'Gestion',category:'Admin',trade:'Agencement intérieur',earliest:'2026-07-06',hours:2,splittable:'non',notes:'Créneau administratif.',status:'Planifié'},
+  {id:6,title:'Remplacement châssis urgent',client:'M. Vidal',category:'Urgent',trade:'Fenêtres et volets',earliest:'2026-07-07',hours:10,splittable:'oui',notes:'Peut glisser automatiquement si retard.',status:'Retard'}
+];
+let tasks = structuredClone(initialTasks); let currentDate = new Date(); currentDate.setDate(1); let slots = [];
+const monthLabel=document.getElementById('monthLabel'), daysEl=document.getElementById('days'), scheduleList=document.getElementById('scheduleList'), themeToggle=document.getElementById('themeToggle');
+function parse(s){return new Date(s+'T12:00:00')} function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)} function addDays(s,n){const d=parse(s); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10)} function weekday(day){return (parse(day).getDay()+6)%7}
+function isLeaveDay(day){return day>=leaveStart && day<=leaveEnd} function isSunday(day){return weekday(day)===6} function isFriday(day){return weekday(day)===4} function isSaturday(day){return weekday(day)===5} function isAllowedSaturday(day){return allowedSaturdaySet.has(day)} function season(day){return day<='2026-08-31'?{name:'Été',dayHours:8,main:'06h00–14h00'}:{name:'Hiver',dayHours:7.5,main:'08h00–17h30'}}
+function isWorkday(day){ if(isLeaveDay(day)||isSunday(day)) return false; if(isSaturday(day) && !isAllowedSaturday(day)) return false; return true; }
+function dailyCapacity(day){ if(!isWorkday(day)) return 0; if(isFriday(day)) return 8; return season(day).dayHours; }
+function baseSlotsForDay(day){ if(!isWorkday(day)) return []; if(isFriday(day)) return [{label:'Livraison',start:'06:00',end:'10:00',hours:4,kind:'system',category:'Livraison'},{label:'Rattrapage',start:'10:00',end:'14:00',hours:4,kind:'system',category:'Rattrapage'}]; if(season(day).name==='Été') return [{start:'06:00',end:'10:00',hours:4,kind:'free'},{start:'10:00',end:'14:00',hours:4,kind:'free'}]; return [{start:'08:00',end:'12:00',hours:4,kind:'free'},{start:'14:00',end:'17:30',hours:3.5,kind:'free'}]; }
+function mondayOfWeek(day){ const d=parse(day); d.setDate(d.getDate()-weekday(day)); return iso(d); }
+function slotAllowedForCategory(day, slot, task){
+  if(task.category==='Commande') return weekday(day) <= 2 && slot.start < '12:00';
+  if(task.category==='Devis') return weekday(day) <= 2 && slot.start < '12:00';
+  if(task.category==='Admin') return !isFriday(day) && slot.hours>=2;
+  if(task.category==='RDV') return slot.start >= '14:00' || (season(day).name==='Été' && slot.start >= '10:00');
+  if(['Urgent','Normal','Flexible'].includes(task.category)) return !isFriday(day);
+  return true;
+}
+function normalizeRecurringNeeds(taskList){
+  const weeks = new Set(taskList.map(t => mondayOfWeek(t.earliest)));
+  weeks.forEach(w => {
+    const weekTasks = taskList.filter(t => mondayOfWeek(t.earliest)===w);
+    if(!weekTasks.some(t => t.category==='Admin')) taskList.push({id:Date.now()+Math.random(),title:'Bloc admin hebdomadaire',client:'Gestion',category:'Admin',trade:'Agencement intérieur',earliest:w,hours:2,splittable:'non',notes:'Ajout automatique 2h/semaine.',status:'Planifié',auto:true});
+    if(!weekTasks.some(t => t.category==='RDV')) taskList.push({id:Date.now()+Math.random(),title:'Visite technique hebdomadaire',client:'Prospection / chantier',category:'RDV',trade:'Agencement intérieur',earliest:addDays(w,3),hours:2,splittable:'non',notes:'Ajout automatique 1 visite / semaine.',status:'Planifié',auto:true});
+  });
+}
+function planTasks(){
+  const workingTasks = structuredClone(tasks);
+  normalizeRecurringNeeds(workingTasks);
+  const ordered = workingTasks.sort((a,b)=> priorityRank[a.category]-priorityRank[b.category] || a.earliest.localeCompare(b.earliest));
+  const occupancy = new Map(); const generated=[];
+  function ensureDay(day){ if(!occupancy.has(day)) occupancy.set(day, baseSlotsForDay(day).map(x=>({...x, used:false}))); return occupancy.get(day); }
+  ordered.forEach(task => {
+    let remaining = Number(task.hours); let day = task.earliest; let firstPlaced=null; let lastPlaced=null; let placedHours=0;
+    while(remaining > 0){
+      if(isLeaveDay(day)){ day = addDays(day,1); continue; }
+      const daySlots = ensureDay(day);
+      for(const slot of daySlots){
+        if(remaining<=0) break;
+        if(slot.kind==='system' || slot.used) continue;
+        if(!slotAllowedForCategory(day, slot, task)) continue;
+        if(task.splittable==='non' && remaining > slot.hours){ continue; }
+        const useHours = task.splittable==='oui' ? Math.min(slot.hours, remaining) : remaining;
+        if(useHours <= slot.hours){
+          slot.used = true;
+          generated.push({taskId:task.id, title:task.title, client:task.client, category:task.category, trade:task.trade, day, start:slot.start, end:slot.end, hours:useHours, notes:task.notes, status:task.status, color:tradeColors[task.trade]||'#6f4a2d'});
+          remaining = Number((remaining - useHours).toFixed(2)); placedHours += useHours; if(!firstPlaced) firstPlaced = day; lastPlaced = day;
+        }
+      }
+      day = addDays(day,1);
+      if(day > '2026-12-31') break;
+    }
+    task.plannedStart = firstPlaced; task.plannedEnd = lastPlaced; task.remaining = remaining; task.placedHours = placedHours;
+  });
+  tasks = ordered;
+  slots = generated;
+}
+function renderSeasonTable(){ document.getElementById('seasonTable').innerHTML = `<tr><td>Été</td><td>06h00–14h00</td><td>8h nettes, sans pause.</td></tr><tr><td>Hiver</td><td>08h00–12h00 puis 14h00–17h30</td><td>7h30 nettes, pause 12h–14h.</td></tr><tr><td>Vendredi</td><td>06h00–10h00 / 10h00–14h00</td><td>Livraison puis rattrapage, sans chantier.</td></tr><tr><td>Devis</td><td>Lun–Mer matin</td><td>2h hebdomadaires.</td></tr><tr><td>RDV</td><td>Après-midi</td><td>1 visite technique / semaine.</td></tr>`; }
+function renderStats(){ document.getElementById('statTasks').textContent = tasks.length; document.getElementById('statSlots').textContent = slots.length; document.getElementById('statDelay').textContent = tasks.filter(t=>t.status==='Retard').length; document.getElementById('statBlocked').textContent = 11; }
+function slotsOfDay(day){ const system = baseSlotsForDay(day).filter(s=>s.kind==='system').map(s=>({title:s.label, category:s.category, day, start:s.start, end:s.end, color:'#555555', system:true})); return [...system, ...slots.filter(s=>s.day===day)].sort((a,b)=>a.start.localeCompare(b.start)); }
+function renderCalendar(){
+  const year=currentDate.getFullYear(), month=currentDate.getMonth(); monthLabel.textContent=currentDate.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const first=new Date(year,month,1), firstIdx=(first.getDay()+6)%7, daysInMonth=new Date(year,month+1,0).getDate(), prevMonthDays=new Date(year,month,0).getDate(), total=Math.ceil((firstIdx+daysInMonth)/7)*7; const today=iso(new Date()); daysEl.innerHTML='';
+  for(let i=0;i<total;i++){
+    const cell=document.createElement('div'); cell.className='day'; let dayNum,cellDate,other=false;
+    if(i<firstIdx){dayNum=prevMonthDays-firstIdx+i+1; cellDate=new Date(year,month-1,dayNum); other=true;} else if(i>=firstIdx+daysInMonth){dayNum=i-firstIdx-daysInMonth+1; cellDate=new Date(year,month+1,dayNum); other=true;} else {dayNum=i-firstIdx+1; cellDate=new Date(year,month,dayNum);} const day=iso(cellDate);
+    if(other) cell.classList.add('is-other'); if(day===today) cell.classList.add('is-today'); if(isLeaveDay(day)) cell.classList.add('is-blocked');
+    const items=slotsOfDay(day); let extra=''; if(isLeaveDay(day)) extra='Congés'; else if(isFriday(day)) extra='Vendredi réservé'; else if(isSaturday(day) && isAllowedSaturday(day)) extra='Samedi travaillé'; else if(isSaturday(day)) extra='Samedi fermé';
+    cell.innerHTML=`<div class="day-top"><span>${dayNum}</span><span class="count">${items.length}</span></div><div class="tiny">${season(day).name} · ${dailyCapacity(day)}h</div>${extra?`<div class="tiny">${extra}</div>`:''}`;
+    items.slice(0,3).forEach(item=>{const el=document.createElement('div'); el.className='slot'; el.style.setProperty('--slot-color', item.color || '#6f4a2d'); el.innerHTML=`<strong>${item.start}</strong><small>${item.title}</small>`; cell.appendChild(el)}); if(items.length>3){const more=document.createElement('div'); more.className='tiny'; more.textContent=`+${items.length-3} autre(s)`; cell.appendChild(more);} daysEl.appendChild(cell);
+  }
+}
+function statusBadge(status){const map={'Planifié':'b-plan','En cours':'b-run','En attente':'b-wait','Retard':'b-delay'}; return `<span class="badge ${map[status]||'b-plan'}">${status}</span>`}
+function renderList(){ scheduleList.innerHTML=''; [...tasks].sort((a,b)=> priorityRank[a.category]-priorityRank[b.category] || a.earliest.localeCompare(b.earliest)).forEach(task => { const taskSlots = slots.filter(s=>s.taskId===task.id); const warning = task.remaining>0 ? `Charge non placée : ${task.remaining}h.` : 'Planifié entièrement.'; const item=document.createElement('article'); item.className='schedule-item'; item.innerHTML=`<div class="schedule-item-top"><div><h3 style="font-size:var(--text-base)">${task.title}</h3><p class="muted">${task.client} · ${task.category} · ${task.trade}</p></div>${statusBadge(task.status)}</div><p class="tiny">À partir du ${task.earliest} · charge ${task.hours}h · priorité ${priorityRank[task.category]}</p><p>${task.notes || 'Sans note.'}</p><div class="note">${warning} ${task.plannedStart ? `Placement du ${task.plannedStart} au ${task.plannedEnd}.` : 'Aucun placement trouvé.'}</div><div class="tiny">Créneaux : ${taskSlots.map(s=>`${s.day} ${s.start}`).join(' · ') || 'Aucun'}</div><div class="actions"><button class="btn" type="button" onclick="delayTask(${task.id})">Retard +1 jour</button><button class="btn" type="button" onclick="editTask(${task.id})">Modifier</button></div>`; scheduleList.appendChild(item); }); }
+function rerender(){ planTasks(); renderSeasonTable(); renderStats(); renderCalendar(); renderList(); }
+window.delayTask=function(id){ tasks=tasks.map(t=>t.id===id?({...t, earliest:addDays(t.earliest,1), status:'Retard'}):t); rerender(); }
+window.editTask=function(id){ const task=tasks.find(t=>t.id===id); if(!task) return; const earliest=prompt('À partir du (YYYY-MM-DD)', task.earliest); if(earliest===null) return; const hours=prompt('Charge totale (heures)', task.hours); if(hours===null) return; const notes=prompt('Notes', task.notes||''); if(notes===null) return; tasks=tasks.map(t=>t.id===id?({...t, earliest, hours:Number(hours), notes}):t); rerender(); }
+document.getElementById('taskForm').addEventListener('submit', e=>{ e.preventDefault(); const title=document.getElementById('title').value.trim(); const client=document.getElementById('client').value.trim(); const category=document.getElementById('category').value; const trade=document.getElementById('trade').value; const earliest=document.getElementById('earliest').value; const hours=Number(document.getElementById('hours').value); const splittable=document.getElementById('splittable').value; const notes=document.getElementById('notes').value.trim(); if(!title||!client||!earliest||!hours) return; tasks.push({id:Date.now(), title, client, category, trade, earliest, hours, splittable, notes, status:'Planifié'}); e.target.reset(); rerender(); });
+document.getElementById('prevMonth').onclick=()=>{currentDate.setMonth(currentDate.getMonth()-1);renderCalendar()}; document.getElementById('nextMonth').onclick=()=>{currentDate.setMonth(currentDate.getMonth()+1);renderCalendar()}; document.getElementById('todayBtn').onclick=()=>{currentDate=new Date(); currentDate.setDate(1); renderCalendar()}; document.getElementById('replanBtn').onclick=()=>rerender(); document.getElementById('shiftDelays').onclick=()=>{tasks=tasks.map(t=>t.status==='Retard'?({...t, earliest:addDays(t.earliest,1)}):t); rerender()}; document.getElementById('resetDemo').onclick=()=>{tasks=structuredClone(initialTasks); rerender()}; themeToggle.onclick=()=>{const root=document.documentElement; const dark=root.getAttribute('data-theme')==='dark'; root.setAttribute('data-theme',dark?'light':'dark'); themeToggle.textContent=dark?'Mode sombre':'Mode clair'};
+rerender();
+</script>
+</body>
+</html>
